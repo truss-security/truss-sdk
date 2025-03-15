@@ -7,10 +7,14 @@ if (!process.env.TRUSS_API_KEY) {
   throw new Error('TRUSS_API_KEY environment variable is required');
 }
 
+if (!process.env.TRUSS_API_URL) {
+  throw new Error('TRUSS_API_URL environment variable is required');
+}
+
 // Initialize the SDK
 const sdk = new TrussSDK({
   apiKey: process.env.TRUSS_API_KEY,
-  baseUrl: process.env.TRUSS_API_URL || 'https://api.truss-security.com'
+  baseUrl: process.env.TRUSS_API_URL
 });
 
 async function dateSearch() {

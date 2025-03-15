@@ -3,13 +3,18 @@ config();
 import { TrussSDK, SearchFilter } from '../src/index.js';
 
 // Load environment variables
-const API_KEY = process.env.TRUSS_API_KEY || 'your-api-key';
-const API_URL = process.env.TRUSS_API_URL || 'https://api.truss-security.com';
+if (!process.env.TRUSS_API_KEY) {
+  throw new Error('TRUSS_API_KEY environment variable is required');
+}
+
+if (!process.env.TRUSS_API_URL) {
+  throw new Error('TRUSS_API_URL environment variable is required');
+}
 
 // Initialize the SDK
 const sdk = new TrussSDK({
-  apiKey: API_KEY,
-  baseUrl: API_URL
+  apiKey: process.env.TRUSS_API_KEY,
+  baseUrl: process.env.TRUSS_API_URL
 });
 
 async function filterSearch() {

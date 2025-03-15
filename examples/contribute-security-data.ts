@@ -5,13 +5,18 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 // Load environment variables
-const API_KEY = process.env.TRUSS_API_KEY || 'your-api-key';
-const API_URL = process.env.TRUSS_API_URL || 'https://api.truss-security.com';
+if (!process.env.TRUSS_API_KEY) {
+  throw new Error('TRUSS_API_KEY environment variable is required');
+}
+
+if (!process.env.TRUSS_API_URL) {
+  throw new Error('TRUSS_API_URL environment variable is required');
+}
 
 // Initialize the SDK
 const sdk = new TrussSDK({
-  apiKey: API_KEY,
-  baseUrl: API_URL
+  apiKey: process.env.TRUSS_API_KEY,
+  baseUrl: process.env.TRUSS_API_URL
 });
 
 async function contributeSecurityData() {
@@ -31,8 +36,8 @@ async function contributeSecurityData() {
         console.log('Type:', product.type);
         
         // Count indicators
-        const indicatorCount = Object.values(product.indicators)
-          .reduce((sum, arr) => sum + arr.length, 0);
+        const indicatorCount = Object.values(product.indicators || {})
+          .reduce((sum: number, arr) => sum + (arr as string[]).length, 0);
         console.log('Number of indicators:', indicatorCount);
 
         // Submit the product
@@ -40,7 +45,7 @@ async function contributeSecurityData() {
         
         console.log('Successfully contributed product:');
         console.log('- ID:', result.data.id);
-        console.log('- Status:', result.statusCode);
+        console.log('- Status:', result.status);
         console.log('- Version:', result.data.version);
 
       } catch (error) {
