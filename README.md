@@ -8,6 +8,10 @@ A TypeScript SDK for contributing and accessing security data through the Truss 
 npm install @truss-security/sdk
 ```
 
+## Set up environment
+
+Copy env.example to .env and set your API key.
+
 ## Usage
 
 ### Initialize the SDK
@@ -58,10 +62,10 @@ import { SearchFilter } from '@truss-security/sdk';
 const filter: SearchFilter = {
   category: ['malware'],
   source: ['internal'],
-  startdate: '2024-01-01',
-  enddate: '2024-03-15',
+  startdate: '2025-01-01',
+  enddate: '2025-01-15',
   tags: ['ransomware'],
-  scanOldestToNewest: true
+  scanOldestToNewest: false
 };
 
 try {
