@@ -1,4 +1,6 @@
-import { TrussSDK, SearchFilter } from '../src';
+import { config } from 'dotenv';
+config();
+import { TrussSDK, SearchFilter, LastEvaluatedKey } from '../src/index.js';
 
 // Load environment variables
 const API_KEY = process.env.TRUSS_API_KEY || 'your-api-key';
@@ -13,15 +15,15 @@ const sdk = new TrussSDK({
 async function paginationExample() {
   try {
     console.log('Demonstrating pagination...');
-    let lastKey = undefined;
+    let lastKey: LastEvaluatedKey | undefined = undefined;
     let pageNum = 1;
     const maxPages = 3; // Limit for this example
 
     // Initial search filter
     const filter: SearchFilter = {
-      category: ['web'],
-      tags: ['critical'],
-      days: 30
+      source: ['OpenPhish'],
+      startdate: '2025-02-21',
+      enddate: '2025-04-25',
     };
 
     do {
@@ -33,16 +35,18 @@ async function paginationExample() {
 
       const results = await sdk.searchProducts(searchFilter);
       console.log(`\nPage ${pageNum}:`);
-      console.log(`Found ${results.data.items.length} items`);
-      
-      results.data.items.forEach(item => {
+       
+      results.data.Items.forEach(item => {
         console.log(`- ${item.title}`);
-        console.log(`  Category: ${item.category}`);
-        console.log(`  Tags: ${item.tags?.join(', ')}`);
+        console.log(`  Source: ${item.source}`);
+        console.log(`  Industry: ${item.industry}`);
       });
 
       // Get the LastEvaluatedKey for the next page
-      lastKey = results.data.lastEvaluatedKey;
+      if (results.data.LastEvaluatedKey) {
+        console.log('LastEvaluatedKey: ', results.data.LastEvaluatedKey);
+        lastKey = results.data.LastEvaluatedKey;
+      }
       pageNum++;
 
       // Stop after maxPages or when there are no more results
@@ -61,9 +65,7 @@ async function paginationExample() {
 }
 
 // Run the example
-if (require.main === module) {
-  paginationExample().catch(error => {
-    console.error('Unhandled error:', error);
-    process.exit(1);
-  });
-} 
+paginationExample().catch(error => {
+  console.error('Unhandled error:', error);
+  process.exit(1);
+}); 

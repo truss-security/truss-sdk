@@ -67,20 +67,17 @@ export interface TrussConfig {
  */
 export interface ApiResponse<T> {
   data: T;
-  statusCode: number;
-  message?: string;
+  status: number;
 }
-
 /**
  * Interface for paginated search results
  */
 export interface SearchResponse {
-  items: Product[];
-  lastEvaluatedKey?: {
-    PK: string;
-    SK: string;
-    [key: string]: string | number | undefined;
-  };
+  $metadata: any;
+  Count: number;
+  Items: Product[];
+  ScannedCount: number;
+  LastEvaluatedKey?: LastEvaluatedKey;
 } 
 
 /**

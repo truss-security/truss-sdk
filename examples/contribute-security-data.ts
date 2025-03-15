@@ -1,4 +1,6 @@
-import { TrussSDK, Product } from '../src';
+import { config } from 'dotenv';
+config();
+import { TrussSDK, Product } from '../src/index.js';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -57,9 +59,7 @@ async function contributeSecurityData() {
 }
 
 // Run the example
-if (require.main === module) {
-  contributeSecurityData().catch(error => {
-    console.error('Unhandled error:', error);
-    process.exit(1);
-  });
-} 
+contributeSecurityData().catch(error => {
+  console.error('Unhandled error:', error);
+  process.exit(1);
+}); 

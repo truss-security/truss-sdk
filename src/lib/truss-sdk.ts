@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { Product, SearchFilter, TrussConfig, ApiResponse, SearchResponse } from './types';
 
 /**
@@ -25,20 +25,40 @@ export class TrussSDK {
   }
 
   /**
+   * Internal method for making API calls to Truss endpoints
+   * @param server Base server URL
+   * @param endpoint API endpoint
+   * @param data Request payload
+   * @returns Promise with the API response
+   */
+  private trussApi = async (endpoint: string, data: any): Promise<any> => {
+    try {
+      const response = await axios({
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-api-key': this.config.apiKey
+        },
+        data,
+        url: `${this.config.baseUrl}${endpoint}`,
+        timeout: this.config.timeout || 10000
+      })
+      return response
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        throw new Error(`API Error: ${err.response?.data?.message || err.message}`);
+      }
+      throw err;
+    }
+  }
+
+  /**
    * Create a new security product
    * @param product Product data to create
    * @returns Promise with the created product
    */
   async createProduct(product: Product): Promise<ApiResponse<Product>> {
-    try {
-      const response = await this.client.post<ApiResponse<Product>>('/product/create', product);
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        throw new Error(`Failed to create product: ${error.response?.data?.message || error.message}`);
-      }
-      throw error;
-    }
+    return this.trussApi('/product/create', product);
   }
 
   /**
@@ -47,15 +67,7 @@ export class TrussSDK {
    * @returns Promise with search results
    */
   async searchProducts(filter: SearchFilter): Promise<ApiResponse<SearchResponse>> {
-    try {
-      const response = await this.client.post<ApiResponse<SearchResponse>>('/product/search', filter);
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        throw new Error(`Failed to search products: ${error.response?.data?.message || error.message}`);
-      }
-      throw error;
-    }
+    return this.trussApi('/product/search', filter);
   }
 
   /**

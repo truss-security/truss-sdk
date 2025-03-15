@@ -1,4 +1,6 @@
-import { TrussSDK, SearchFilter } from '../src';
+import { config } from 'dotenv';
+config();
+import { TrussSDK, SearchFilter } from '../src/index.js';
 
 // Load environment variables
 const API_KEY = process.env.TRUSS_API_KEY || 'your-api-key';
@@ -15,18 +17,19 @@ async function basicSearch() {
     // Basic search for recent critical ransomware threats
     console.log('Searching for recent critical ransomware threats...');
     const searchFilter: SearchFilter = {
-      category: ['malware'],
-      tags: ['ransomware', 'critical'],
-      days: 30 // Last 30 days
+      category: ['Malware'],
+      tags: ['opendir', 'mirai'],
+      startdate: '2025-03-08',
+      enddate: '2025-03-14'
     };
 
     const results = await sdk.searchProducts(searchFilter);
-    console.log(`Found ${results.data.items.length} matching threats`);
+    console.log(`Found ${results.data.Items.length} matching threats`);
     
-    results.data.items.forEach(item => {
+    results.data.Items.forEach(item => {
       console.log(`- ${item.title} (${item.category})`);
       console.log(`  Tags: ${item.tags?.join(', ')}`);
-      console.log(`  Indicators: ${Object.keys(item.indicators || {}).join(', ')}`);
+      console.log(`  Category: ${item.category}`);
     });
 
   } catch (error: any) {
@@ -36,9 +39,7 @@ async function basicSearch() {
 }
 
 // Run the example
-if (require.main === module) {
-  basicSearch().catch(error => {
-    console.error('Unhandled error:', error);
-    process.exit(1);
-  });
-} 
+basicSearch().catch(error => {
+  console.error('Unhandled error:', error);
+  process.exit(1);
+}); 

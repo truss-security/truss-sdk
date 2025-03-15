@@ -200,15 +200,71 @@ For support, please contact support@truss-security.com or open an issue on our G
 
 The SDK comes with example scripts demonstrating common use cases. You can find these in the `examples` directory.
 
-### Contributing Security Data
+### Basic Search
 
-The `contribute-security-data.ts` script demonstrates how to contribute security data from a JSON file:
+The `basic-search.ts` script demonstrates a simple search for security data:
 
 ```bash
 # Set your API credentials
 export TRUSS_API_KEY="your-api-key"
 export TRUSS_API_URL="https://api.truss-security.com"
 
+# Run the example
+npx ts-node examples/basic-search.ts
+```
+
+This script shows how to:
+- Search for recent ransomware threats
+- Filter by category and tags
+- Process and display search results
+
+### Date-Based Search
+
+The `date-search.ts` script shows different ways to search by date:
+
+```bash
+# Run the example
+npx ts-node examples/date-search.ts
+```
+
+This script demonstrates:
+- Searching by date range (startdate/enddate)
+- Searching by relative time (days)
+- Handling date-based results
+
+### Boolean Filters
+
+The `filter-search.ts` script shows how to use boolean filters:
+
+```bash
+# Run the example
+npx ts-node examples/filter-search.ts
+```
+
+This script demonstrates:
+- OR filtering within a single parameter
+- AND filtering across multiple parameters
+- Complex filtering with multiple criteria
+
+### Pagination
+
+The `pagination.ts` script shows how to handle large result sets:
+
+```bash
+# Run the example
+npx ts-node examples/pagination.ts
+```
+
+This script demonstrates:
+- Using LastEvaluatedKey for pagination
+- Processing results page by page
+- Handling pagination state
+
+### Contributing Security Data
+
+The `contribute-security-data.ts` script demonstrates how to contribute security data from a JSON file:
+
+```bash
 # Run the example
 npx ts-node examples/contribute-security-data.ts
 ```
@@ -218,25 +274,6 @@ This script:
 - Processes each security product
 - Submits them to the Truss API
 - Handles errors and provides detailed output
-
-### Searching Security Data
-
-The `search-security-data.ts` script shows various ways to search for security data:
-
-```bash
-# Set your API credentials
-export TRUSS_API_KEY="your-api-key"
-export TRUSS_API_URL="https://api.truss-security.com"
-
-# Run the example
-npx ts-node examples/search-security-data.ts
-```
-
-This script demonstrates:
-1. Searching for recent ransomware threats
-2. Finding supply chain vulnerabilities
-3. Using pagination for large result sets
-4. Complex filtering with multiple criteria
 
 ### Sample Data
 
