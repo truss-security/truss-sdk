@@ -5,7 +5,7 @@ TypeScript SDK for pulling Truss API data into applications, ingestion jobs, and
 ## Installation
 
 ```bash
-npm install @truss/api-sdk
+npm install @truss-security/truss-sdk
 ```
 
 Node 18 or newer is required because the SDK uses the built-in `fetch` API.
@@ -57,16 +57,16 @@ npm run example -- basic --json
 Once published, users can try the same runner without cloning the repo:
 
 ```bash
-npx @truss/api-sdk examples
-npx @truss/api-sdk examples --list
-npx @truss/api-sdk examples basic
-npx @truss/api-sdk examples smart --json
+npx @truss-security/truss-sdk examples
+npx @truss-security/truss-sdk examples --list
+npx @truss-security/truss-sdk examples basic
+npx @truss-security/truss-sdk examples smart --json
 ```
 
 ## Quick Start
 
 ```typescript
-import { TrussClient, filter } from '@truss/api-sdk';
+import { TrussClient, filter } from '@truss-security/truss-sdk';
 
 const truss = new TrussClient({
   baseUrl: 'https://api.truss-security.com',
@@ -186,7 +186,7 @@ Requests retry network failures, timeouts, and common transient HTTP statuses: `
 ## Error Handling
 
 ```typescript
-import { TrussApiError, TrussTimeoutError } from '@truss/api-sdk';
+import { TrussApiError, TrussTimeoutError } from '@truss-security/truss-sdk';
 
 try {
   await truss.search.products({ days: 7 });
