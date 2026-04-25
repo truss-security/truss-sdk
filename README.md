@@ -1,281 +1,210 @@
-# Truss Security SDK
+# Truss API SDK
 
-A TypeScript SDK for contributing and accessing security data through the Truss Security API.
+TypeScript SDK for pulling Truss API data into applications, ingestion jobs, and agents.
 
 ## Installation
 
 ```bash
-npm install @truss-security/sdk
+npm install @truss/api-sdk
 ```
 
-## Set up environment
+Node 18 or newer is required because the SDK uses the built-in `fetch` API.
 
-Copy env.example to .env and set your API key.
+## Run Examples Quickly
 
-## Usage
+Set your API credentials once:
 
-### Initialize the SDK
+```bash
+cp env.example .env
+```
+
+Then run an example from this repo:
+
+```bash
+npm install
+npm run example
+npm run example:basic
+npm run example:typed-filter
+npm run example:iterate
+npm run example:smart
+npm run example:stix
+```
+
+`npm run example` opens an interactive picker in a terminal. In CI or non-interactive output, it prints the available examples instead.
+
+You can also run examples directly by name:
+
+```bash
+npm run example -- basic
+npm run example -- typed-filter
+npm run example -- iterate
+npm run example -- smart
+npm run example -- stix
+```
+
+To print the list without opening the picker, use `--list`:
+
+```bash
+npm run example -- --list
+```
+
+Each example prints a concise human-readable summary. Add `--json` when you want the raw response:
+
+```bash
+npm run example -- basic --json
+```
+
+Once published, users can try the same runner without cloning the repo:
+
+```bash
+npx @truss/api-sdk examples
+npx @truss/api-sdk examples --list
+npx @truss/api-sdk examples basic
+npx @truss/api-sdk examples smart --json
+```
+
+## Quick Start
 
 ```typescript
-import { TrussSDK } from '@truss-security/sdk';
+import { TrussClient, filter } from '@truss/api-sdk';
 
-const sdk = new TrussSDK({
-  apiKey: 'your-api-key',
+const truss = new TrussClient({
   baseUrl: 'https://api.truss-security.com',
-  timeout: 10000 // optional, defaults to 10000ms
+  apiKey: process.env.TRUSS_API_KEY,
+});
+
+const results = await truss.search.products({
+  filter: filter.and(
+    filter.eq('category', 'Malware'),
+    filter.anyOf('region', ['North America', 'Europe'])
+  ),
+  days: 7,
+  limit: 25,
+});
+
+console.log(results.products);
+```
+
+## Search Products
+
+Use `search.products` when you want structured product data for your app.
+
+```typescript
+const page = await truss.search.products({
+  filterExpression: "category = 'Phishing' AND source = 'OpenPhish'",
+  startDate: '2025-01-01',
+  endDate: '2025-01-31',
+  page: 1,
+  limit: 50,
 });
 ```
 
-### Create a Security Product
+For ingestion jobs and agents, use the pagination helpers instead of writing page loops.
 
 ```typescript
-import { Product } from '@truss-security/sdk';
-
-const product: Product = {
-  title: 'Security Alert',
-  type: 'alert',
-  category: 'malware',
-  source: 'internal',
-  author: ['security-team'],
-  industry: ['technology'],
-  region: ['north-america'],
-  indicators: {
-    ip: ['192.168.1.1'],
-    domain: ['malicious.com']
-  },
-  tags: ['ransomware', 'critical']
-};
-
-try {
-  const result = await sdk.createProduct(product);
-  console.log('Created product:', result.data);
-} catch (error) {
-  console.error('Failed to create product:', error);
+for await (const product of truss.search.iterProducts({ days: 7, limit: 100 })) {
+  await indexProduct(product);
 }
 ```
 
-### Search Security Products
-
 ```typescript
-import { SearchFilter } from '@truss-security/sdk';
-
-const filter: SearchFilter = {
-  category: ['malware'],
-  source: ['internal'],
-  startdate: '2025-01-01',
-  enddate: '2025-01-15',
-  tags: ['ransomware'],
-  scanOldestToNewest: false
-};
-
-try {
-  const result = await sdk.searchProducts(filter);
-  console.log('Search results:', result.data.items);
-  
-  // Handle pagination if needed
-  if (result.data.lastEvaluatedKey) {
-    console.log('More results available');
-  }
-} catch (error) {
-  console.error('Failed to search products:', error);
-}
+const products = await truss.search.productsAll(
+  { days: 7, limit: 100 },
+  { maxPages: 10 }
+);
 ```
 
-## API Reference
+## AI and Vector Search
 
-### TrussSDK
-
-#### Constructor
+Use semantic search when users or agents have natural-language intent.
 
 ```typescript
-new TrussSDK(config: TrussConfig)
+const vectorResults = await truss.search.vector({
+  query: 'recent ransomware activity against hospitals',
+  limit: 10,
+  similarity_threshold: 0.75,
+});
 ```
 
-Configuration options:
-- `apiKey` (required): Your Truss API key
-- `baseUrl` (required): The base URL of the Truss API
-- `timeout` (optional): Request timeout in milliseconds (default: 10000)
-
-#### Methods
-
-##### createProduct
+Use smart search when you want the API to parse natural language into filters and optionally produce a response.
 
 ```typescript
-createProduct(product: Product): Promise<ApiResponse<Product>>
+const answer = await truss.search.smart({
+  query: 'What are the latest phishing threats in North America?',
+  limit: 10,
+  generate_response: true,
+});
 ```
 
-Create a new security product in the Truss platform.
+## STIX
 
-##### searchProducts
+The SDK exposes STIX endpoints for security tooling interoperability.
 
 ```typescript
-searchProducts(filter: SearchFilter): Promise<ApiResponse<SearchResponse>>
+const bundle = await truss.search.productStix(123);
+
+const stixResults = await truss.search.productsStix({
+  filterExpression: "category = 'Malware'",
+  days: 14,
+  limit: 50,
+});
 ```
 
-Search for security products using various filter criteria.
+## Filters
 
-##### getConfig
+You can pass raw FilterQL with `filterExpression`, or use the typed `filter` helper.
 
 ```typescript
-getConfig(): TrussConfig
+const productFilter = filter.and(
+  filter.eq('category', 'Malware'),
+  filter.notEq('source', 'Example Source'),
+  filter.like('title', 'ransomware')
+);
+
+const filterExpression = filter.expression(productFilter);
 ```
 
-Get the current SDK configuration.
+Supported filter attributes are exported as TypeScript types and include `category`, `source`, `type`, `title`, `author`, `industry`, `region`, `reference`, `tags`, `validators`, and `indicators`.
 
-##### updateConfig
+## Configuration
 
 ```typescript
-updateConfig(config: Partial<TrussConfig>): void
+const truss = new TrussClient({
+  baseUrl: 'https://api.truss-security.com',
+  apiKey: process.env.TRUSS_API_KEY,
+  timeout: 30_000,
+  retries: 3,
+  retryDelayMs: 250,
+  userAgent: 'my-app/1.0',
+});
+
+truss.setApiKey('new-api-key');
 ```
 
-Update the SDK configuration.
-
-### Types
-
-#### Product
-
-```typescript
-interface Product {
-  id?: string;
-  title?: string;
-  type: string;
-  category: string;
-  source: string;
-  author?: string[];
-  industry?: string[];
-  region?: string[];
-  indicators?: Record<string, string[]>;
-  tags?: string[];
-  // ... other properties
-}
-```
-
-#### SearchFilter
-
-```typescript
-interface SearchFilter {
-  startdate?: number | string;
-  enddate?: number | string;
-  days?: number;
-  category?: string[];
-  source?: string[];
-  author?: string[];
-  industry?: string[];
-  region?: string[];
-  tags?: string[];
-  indicators?: Record<string, any>;
-  scanOldestToNewest?: boolean;
-}
-```
+Requests retry network failures, timeouts, and common transient HTTP statuses: `408`, `429`, `500`, `502`, `503`, and `504`.
 
 ## Error Handling
 
-The SDK throws errors with descriptive messages when API calls fail. Always wrap SDK calls in try-catch blocks to handle potential errors gracefully.
+```typescript
+import { TrussApiError, TrussTimeoutError } from '@truss/api-sdk';
+
+try {
+  await truss.search.products({ days: 7 });
+} catch (error) {
+  if (error instanceof TrussApiError) {
+    console.error(error.status, error.response.data);
+  } else if (error instanceof TrussTimeoutError) {
+    console.error('Request timed out');
+  } else {
+    throw error;
+  }
+}
+```
 
 ## Development
 
 ```bash
-# Install dependencies
 npm install
-
-# Build the SDK
 npm run build
-
-# Run tests
-npm test
-
-# Run linter
-npm run lint
+npm run example
 ```
-
-## License
-
-MIT
-
-## Support
-
-For support, please contact support@truss-security.com or open an issue on our GitHub repository.
-
-## Examples
-
-The SDK comes with example scripts demonstrating common use cases. You can find these in the `examples` directory.
-
-### Basic Search
-
-The `basic-search.ts` script demonstrates a simple search for security data:
-
-```bash
-# Set your API credentials
-export TRUSS_API_KEY="your-api-key"
-export TRUSS_API_URL="https://api.truss-security.com"
-
-# Run the example
-npx ts-node examples/basic-search.ts
-```
-
-This script shows how to:
-- Search for recent ransomware threats
-- Filter by category and tags
-- Process and display search results
-
-### Date-Based Search
-
-The `date-search.ts` script shows different ways to search by date:
-
-```bash
-# Run the example
-npx ts-node examples/date-search.ts
-```
-
-This script demonstrates:
-- Searching by date range (startdate/enddate)
-- Searching by relative time (days)
-- Handling date-based results
-
-### Boolean Filters
-
-The `filter-search.ts` script shows how to use boolean filters:
-
-```bash
-# Run the example
-npx ts-node examples/filter-search.ts
-```
-
-This script demonstrates:
-- OR filtering within a single parameter
-- AND filtering across multiple parameters
-- Complex filtering with multiple criteria
-
-### Pagination
-
-The `pagination.ts` script shows how to handle large result sets:
-
-```bash
-# Run the example
-npx ts-node examples/pagination.ts
-```
-
-This script demonstrates:
-- Using LastEvaluatedKey for pagination
-- Processing results page by page
-- Handling pagination state
-
-### Contributing Security Data
-
-The `contribute-security-data.ts` script demonstrates how to contribute security data from a JSON file:
-
-```bash
-# Run the example
-npx ts-node examples/contribute-security-data.ts
-```
-
-This script:
-- Reads security data from `examples/data/sample-security-data.json`
-- Processes each security product
-- Submits them to the Truss API
-- Handles errors and provides detailed output
-
-### Sample Data
-
-The `examples/data` directory contains sample security data that you can use to test the SDK:
-- `sample-security-data.json`: Contains example security products with various indicators and metadata 
