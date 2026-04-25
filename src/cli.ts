@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { select } from '@inquirer/prompts';
+import { password, select } from '@inquirer/prompts';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { TrussClient, filter } from './index.js';
@@ -54,7 +54,7 @@ async function main(): Promise<void> {
   if (!exampleName || exampleName === '--json' || exampleName === '--list') {
     if (!listOnly && canPrompt()) {
       const selectedExample = await selectExample();
-      await EXAMPLES[selectedExample].run(json);
+      await runExampleWithAuth(selectedExample, json);
       return;
     }
 
@@ -66,7 +66,7 @@ async function main(): Promise<void> {
     throw new Error(`Unknown example: ${exampleName}`);
   }
 
-  await EXAMPLES[exampleName].run(json);
+  await runExampleWithAuth(exampleName, json);
 }
 
 function createClient(): TrussClient {
@@ -140,6 +140,29 @@ async function selectExample(): Promise<ExampleName> {
 
 function canPrompt(): boolean {
   return Boolean(process.stdin.isTTY && process.stdout.isTTY && !process.env.CI);
+}
+
+async function runExampleWithAuth(exampleName: ExampleName, json: boolean): Promise<void> {
+  await ensureApiKey();
+  await EXAMPLES[exampleName].run(json);
+}
+
+async function ensureApiKey(): Promise<void> {
+  if (process.env.TRUSS_API_KEY) return;
+
+  if (!canPrompt()) {
+    throw new Error(
+      'TRUSS_API_KEY is required. Set TRUSS_API_KEY in your environment or .env file.'
+    );
+  }
+
+  const apiKey = await password({
+    message: 'Enter your Truss API key',
+    mask: '*',
+    validate: (value) => (value.trim() ? true : 'API key is required'),
+  });
+
+  process.env.TRUSS_API_KEY = apiKey.trim();
 }
 
 function printProducts(products: SearchProductResponse[], total?: number): void {

@@ -1,3 +1,4 @@
+import { password } from '@inquirer/prompts';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { TrussClient, type SearchProductResponse } from '../src/index';
@@ -29,11 +30,33 @@ export function printProducts(products: SearchProductResponse[], total?: number)
 
 export async function runExample(run: () => Promise<void>): Promise<void> {
   try {
+    await ensureApiKey();
     await run();
   } catch (error) {
     console.error(error instanceof Error ? error.message : error);
     process.exit(1);
   }
+}
+
+async function ensureApiKey(): Promise<void> {
+  loadDotEnv();
+  if (process.env.TRUSS_API_KEY) return;
+
+  if (!canPrompt()) {
+    throw new Error('TRUSS_API_KEY is required. Set TRUSS_API_KEY in your environment or .env file.');
+  }
+
+  const apiKey = await password({
+    message: 'Enter your Truss API key',
+    mask: '*',
+    validate: (value) => (value.trim() ? true : 'API key is required'),
+  });
+
+  process.env.TRUSS_API_KEY = apiKey.trim();
+}
+
+function canPrompt(): boolean {
+  return Boolean(process.stdin.isTTY && process.stdout.isTTY && !process.env.CI);
 }
 
 function loadDotEnv(): void {

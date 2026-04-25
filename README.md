@@ -54,13 +54,15 @@ Each example prints a concise human-readable summary. Add `--json` when you want
 npm run example -- basic --json
 ```
 
+If `TRUSS_API_KEY` is not set, the CLI and local examples prompt for it in interactive terminals.
+
 Once published, users can try the same runner without cloning the repo:
 
 ```bash
-npx @truss-security/truss-sdk examples
-npx @truss-security/truss-sdk examples --list
-npx @truss-security/truss-sdk examples basic
-npx @truss-security/truss-sdk examples smart --json
+npx -p @truss-security/truss-sdk@latest truss examples
+npx -p @truss-security/truss-sdk@latest truss examples --list
+npx -p @truss-security/truss-sdk@latest truss examples basic
+npx -p @truss-security/truss-sdk@latest truss examples smart --json
 ```
 
 ## Quick Start
