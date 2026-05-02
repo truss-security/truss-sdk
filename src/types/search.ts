@@ -41,14 +41,4 @@ export interface SearchProductsResponse {
   page: number;
   limit: number;
   hasMore: boolean;
-  debug?: {
-    searchParams: Record<string, unknown>;
-    resultCount: number;
-    hasStartDate: boolean;
-    hasEndDate: boolean;
-    hasDays: boolean;
-    startDateValue: string | number | undefined;
-    endDateValue: string | number | undefined;
-    daysValue: number | undefined;
-  };
 }

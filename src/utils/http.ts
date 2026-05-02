@@ -137,20 +137,22 @@ export class HttpClient {
   }
 
   private buildHeaders(headersInit: RequestInit['headers']): Record<string, string> {
-    const headers: Record<string, string> = {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      'x-truss-sdk-user-agent': this.config.userAgent,
-    };
+    // Caller headers first; SDK-controlled keys are applied last so auth and content defaults cannot be overridden.
+    const sdkControlled = new Set(['accept', 'content-type', 'x-api-key', 'x-truss-sdk-user-agent']);
+    const headers: Record<string, string> = {};
+    const incoming = new Headers(headersInit);
+    incoming.forEach((value, key) => {
+      if (!sdkControlled.has(key.toLowerCase())) {
+        headers[key] = value;
+      }
+    });
 
+    headers.Accept = 'application/json';
+    headers['Content-Type'] = 'application/json';
+    headers['x-truss-sdk-user-agent'] = this.config.userAgent;
     if (this.config.apiKey) {
       headers['x-api-key'] = this.config.apiKey;
     }
-
-    const incoming = new Headers(headersInit);
-    incoming.forEach((value, key) => {
-      headers[key] = value;
-    });
 
     return headers;
   }

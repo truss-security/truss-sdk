@@ -36,26 +36,9 @@ export interface ProductRelations {
   reference?: string[];
 }
 
-export interface ProductEmbeddings {
-  title_embedding?: number[];
-  content_embedding?: number[];
-}
-
-export interface Product extends ProductCore, ProductRelations, ProductEmbeddings {
+/** Public API product shape (search, GET product, etc.). Embedding vectors are internal-only — see `@truss-security/truss-sdk-internal`. */
+export interface Product extends ProductCore, ProductRelations {
   indicators?: Record<string, string[]>;
-}
-
-export type CreateProductRequest = Omit<Product, 'id' | 'timestamp' | 'truss_prod_id' | 'version' | 'latest_version'> & { generateEmbeddings?: boolean };
-
-// Processed product result
-export interface ProcessedProduct extends ProductCore,ProductRelations {
-  processedIndicators: Array<{
-    originalValue: string;
-    normalizedValue: string;
-    type: string;
-    isValid: boolean;
-    indicatorValueId: number;
-  }>;
 }
 
 export type FilterComparisonOperator = '=' | '!=' | 'LIKE';
