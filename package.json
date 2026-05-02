@@ -1,6 +1,6 @@
 {
   "name": "@truss-security/truss-sdk",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "TypeScript SDK for the Truss API",
   "type": "module",
   "main": "dist/index.js",
@@ -23,7 +23,6 @@
     "example:basic": "tsx examples/basic-search.ts",
     "example:typed-filter": "tsx examples/typed-filter-search.ts",
     "example:iterate": "tsx examples/iterate-products.ts",
-    "example:smart": "tsx examples/smart-agent-search.ts",
     "example:stix": "tsx examples/stix-search.ts",
     "prepublishOnly": "npm run clean && npm run build"
   },

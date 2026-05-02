@@ -26,7 +26,6 @@ npm run example
 npm run example:basic
 npm run example:typed-filter
 npm run example:iterate
-npm run example:smart
 npm run example:stix
 ```
 
@@ -38,7 +37,6 @@ You can also run examples directly by name:
 npm run example -- basic
 npm run example -- typed-filter
 npm run example -- iterate
-npm run example -- smart
 npm run example -- stix
 ```
 
@@ -56,13 +54,14 @@ npm run example -- basic --json
 
 If `TRUSS_API_KEY` is not set, the CLI and local examples prompt for it in interactive terminals.
 
-Once published, users can try the same runner without cloning the repo:
+To run examples without cloning the repo:
 
 ```bash
 npx -p @truss-security/truss-sdk@latest truss examples
 npx -p @truss-security/truss-sdk@latest truss examples --list
 npx -p @truss-security/truss-sdk@latest truss examples basic
-npx -p @truss-security/truss-sdk@latest truss examples smart --json
+# You will be prompted to install truss-sdk to a temporary local npm cache.
+# Ok to proceed? (y) 
 ```
 
 ## Quick Start
@@ -85,6 +84,13 @@ const results = await truss.search.products({
 });
 
 console.log(results.products);
+```
+
+## Get one product
+
+```typescript
+const product = await truss.search.product('01ARZ3NDEKTSV4RRFFQ69G5FAV');
+// or await truss.search.product(12345);
 ```
 
 ## Search Products
@@ -116,27 +122,9 @@ const products = await truss.search.productsAll(
 );
 ```
 
-## AI and Vector Search
+## Internal / admin-only search (vector, global, smart, similar)
 
-Use semantic search when users or agents have natural-language intent.
-
-```typescript
-const vectorResults = await truss.search.vector({
-  query: 'recent ransomware activity against hospitals',
-  limit: 10,
-  similarity_threshold: 0.75,
-});
-```
-
-Use smart search when you want the API to parse natural language into filters and optionally produce a response.
-
-```typescript
-const answer = await truss.search.smart({
-  query: 'What are the latest phishing threats in North America?',
-  limit: 10,
-  generate_response: true,
-});
-```
+Endpoints such as `POST /search/vector`, `POST /search/global`, `POST /search/smart`, and `GET /search/similar/{id}` require **internal** API access. Use **`@truss-security/truss-sdk-internal`**, which re-exports this package and adds `TrussInternalClient` with `search.vector`, `search.global`, `search.smart`, and `search.similar`. See that package’s README.
 
 ## STIX
 
@@ -210,3 +198,4 @@ npm install
 npm run build
 npm run example
 ```
+

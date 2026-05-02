@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 import { TrussClient, filter } from './index.js';
 import type { SearchProductResponse, TrussClientConfig } from './types/index.js';
 
-type ExampleName = 'basic' | 'typed-filter' | 'iterate' | 'smart' | 'stix';
+type ExampleName = 'basic' | 'typed-filter' | 'iterate' | 'stix';
 
 const EXAMPLES: Record<ExampleName, { title: string; description: string; run: (json: boolean) => Promise<void> }> = {
   basic: {
@@ -22,11 +22,6 @@ const EXAMPLES: Record<ExampleName, { title: string; description: string; run: (
     title: 'Iterate products',
     description: 'Stream paginated products with an async iterator.',
     run: runIterateExample,
-  },
-  smart: {
-    title: 'Smart agent search',
-    description: 'Use natural-language search with an agent-friendly response.',
-    run: runSmartExample,
   },
   stix: {
     title: 'STIX export',
@@ -113,7 +108,6 @@ Examples:
   truss examples basic
   truss examples typed-filter
   truss examples iterate
-  truss examples smart
   truss examples stix
 `);
 }
@@ -235,34 +229,6 @@ async function runIterateExample(json: boolean): Promise<void> {
 
   console.log('Iterated products from the last 7 days');
   printProducts(products);
-}
-
-async function runSmartExample(json: boolean): Promise<void> {
-  const prompt = 'Summarize recent ransomware threats affecting healthcare organizations';
-
-  if (!json) {
-    console.log('Smart agent search');
-    console.log(`Prompt: ${prompt}\n`);
-  }
-
-  const result = await createClient().search.smart({
-    query: prompt,
-    limit: 10,
-    generate_response: true,
-    max_results_for_response: 5,
-  });
-
-  if (json) {
-    console.log(JSON.stringify(result, null, 2));
-    return;
-  }
-
-  console.log('Parsed filters:', JSON.stringify(result.parsed_filters ?? {}, null, 2));
-  printProducts(result.products, result.total);
-  if (result.ai_response?.answer) {
-    console.log('\nAI response:');
-    console.log(typeof result.ai_response.answer === 'string' ? result.ai_response.answer : result.ai_response.answer.summary);
-  }
 }
 
 async function runStixExample(json: boolean): Promise<void> {
