@@ -1,6 +1,6 @@
 {
   "name": "@truss-security/truss-sdk",
-  "version": "0.5.1",
+  "version": "0.5.3",
   "description": "TypeScript SDK for the Truss API",
   "type": "module",
   "main": "dist/index.js",
@@ -16,6 +16,7 @@
     "truss": "./dist/cli.js"
   },
   "scripts": {
+    "prepare": "npm run build",
     "build": "tsc",
     "dev": "tsc --watch",
     "clean": "rm -rf dist",
@@ -44,7 +45,7 @@
   "devDependencies": {
     "@types/node": "^20.0.0",
     "tsx": "^4.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "~5.6.0"
   },
   "peerDependencies": {
     "typescript": ">=4.5.0"

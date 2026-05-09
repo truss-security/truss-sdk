@@ -124,7 +124,7 @@ const products = await truss.search.productsAll(
 
 ## Internal / admin-only search (vector, global, smart, similar)
 
-Endpoints such as `POST /search/vector`, `POST /search/global`, `POST /search/smart`, and `GET /search/similar/{id}` require **internal** API access. Use **`@truss-security/truss-sdk-internal`**, which re-exports this package and adds `TrussInternalClient` with `search.vector`, `search.global`, `search.smart`, and `search.similar`. See that package’s README.
+Endpoints such as `POST /search/vector`, `POST /search/global`, `POST /search/smart`, and `GET /search/similar/{id}` require **internal** API access. Use `**@truss-security/truss-sdk-internal`**, which re-exports this package and adds `TrussInternalClient` with `search.vector`, `search.global`, `search.smart`, and `search.similar`. See that package’s README.
 
 ## STIX
 
@@ -197,5 +197,9 @@ try {
 npm install
 npm run build
 npm run example
+
+# Publish
+npm login
+npm publish
 ```
 
